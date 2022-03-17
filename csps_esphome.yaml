@@ -1,0 +1,110 @@
+esphome:
+  name: nodetest1
+  includes:
+    - CSPS/main.hpp
+    - CSPS/KCORES_CSPS.h
+    - CSPS/KCORES_CSPS.cpp
+    
+  libraries:
+    - "Wire"
+
+esp8266:
+  board: nodemcuv2
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: 'API密码'
+
+ota:
+  password: "OTAMIM"
+
+web_server:
+  port: 80
+
+wifi:
+  networks:
+  - ssid: "WIFI信号1"
+    password: "WIFI密码"
+  - ssid: "WIFI信号2"
+    password: "WIFI密码"
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "热点"
+    password: "热点密码"
+
+captive_portal:
+
+time:
+  - platform: sntp
+    id: nodetest1_time
+    servers: 
+     - ntp1.aliyun.com
+     - ntp.aliyun.com
+     - cn.pool.ntp.org
+
+i2c:
+  sda: D5
+  scl: D6
+  scan: true
+  id: bus_a
+
+number:
+  - platform: template
+    id: csps_rpm
+    name: "Power Fan RPM"
+    optimistic: true
+    min_value: 0
+    max_value: 20000
+    step: 500
+    on_value:
+      then:
+        - lambda: |-
+            auto power = new CSPSPower();
+            App.register_component(power);
+            power->set_fan_rpm(id(csps_rpm).state);
+
+sensor:
+  - platform: wifi_signal
+    name: "WiFi Signal Sensor"
+    update_interval: 60s
+    
+  - platform: custom
+    lambda: |-
+      auto power = new CSPSPower();
+      App.register_component(power);
+      return {power->fan_speed, power->temp1, power->temp2, power->power_out, power->power_in, power->current_out, power->current_in, power->voltage_out, power->voltage_in};
+
+    sensors:
+    - name: "Fan Speed"
+      accuracy_decimals: 0
+      unit_of_measurement: RPM
+    - name: "Temp 1"
+      accuracy_decimals: 1
+      unit_of_measurement: °C
+    - name: "Temp 2"
+      accuracy_decimals: 1
+      unit_of_measurement: °C
+    - name: "Power Out"
+      accuracy_decimals: 0
+      unit_of_measurement: W
+    - name: "Power In"
+      accuracy_decimals: 0
+      unit_of_measurement: W
+    - name: "Current Out"
+      accuracy_decimals: 1
+      unit_of_measurement: A
+    - name: "Current In"
+      accuracy_decimals: 1
+      unit_of_measurement: A
+    - name: "Voltage Out"
+      accuracy_decimals: 1
+      unit_of_measurement: V
+    - name: "Voltage In"
+      accuracy_decimals: 1
+      unit_of_measurement: V
+      
+      
