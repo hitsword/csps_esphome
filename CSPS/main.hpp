@@ -1,10 +1,13 @@
 #include "KCORES_CSPS.h"
 #include "esphome.h"
 
-CSPS PowerSupply(0x5F, 0x57, true);
+CSPS PowerSupply(0x5E, 0x56, true);
 
 class CSPSPower : public PollingComponent {
   public:
+  	TextSensor *name = new TextSensor();
+  	TextSensor *ct = new TextSensor();
+  	
     Sensor *fan_speed = new Sensor();
     Sensor *temp1 = new Sensor();
     Sensor *temp2 = new Sensor();
@@ -29,8 +32,9 @@ class CSPSPower : public PollingComponent {
     }
 
     void update() override {
-      // float current_out = PowerSupply.getOutputCurrent() / 256 / 256 / 256;
-
+      name->publish_state(PowerSupply.getName().c_str());
+      ct->publish_state(PowerSupply.getCT().c_str());
+      
       fan_speed->publish_state(PowerSupply.getFanRPM());
       temp1->publish_state(PowerSupply.getTemp1());
       temp2->publish_state(PowerSupply.getTemp2());

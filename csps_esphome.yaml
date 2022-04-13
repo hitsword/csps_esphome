@@ -67,6 +67,17 @@ number:
             App.register_component(power);
             power->set_fan_rpm(id(csps_rpm).state);
 
+text_sensor:
+  - platform: custom
+    lambda: |-
+      auto power = new CSPSPower();
+      App.register_component(power);
+      return {power->name,power->ct};
+
+    text_sensors:
+    - name: "Power Name"
+    - name: "CT Code"
+
 sensor:
   - platform: wifi_signal
     name: "WiFi Signal Sensor"
@@ -106,5 +117,3 @@ sensor:
     - name: "Voltage In"
       accuracy_decimals: 1
       unit_of_measurement: V
-      
-      
